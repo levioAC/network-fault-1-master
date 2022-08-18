@@ -1,8 +1,9 @@
 package edu.cose.seu.networkfault.controller;
 
-import com.baomidou.mybatisplus.extension.activerecord.Model;
+import com.alibaba.fastjson.JSON;
 import edu.cose.seu.networkfault.model.User;
 import edu.cose.seu.networkfault.service.UserService;
+import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,20 +16,30 @@ public class UserController {
     private UserService userServiceImpl;
 
     @RequestMapping(value="/login")
-    public String login(@RequestParam("model.User.id")Integer id,
-                        @RequestParam("model.User.password")String password,
-                        Model model){
-        User user = new User(id,password);
-        try {
-            if(userServiceImpl.login(user)!=null) {
-                return "index";
-            }else {
-//                model.addAttribute("msg","用户名或密码错误");
-                return "login";
+    public JSONObject login(@RequestParam("model.User.id")Integer id,
+                        @RequestParam("model.User.password")String password){
+        //若该用户不存在
+        if(!userServiceImpl.ifExistUser(id)){
+            return new JSONObject().getJSONObject("password or id is wrong");
+        }else {
+            User user=userServiceImpl.login(id, password);
+            if(user!=null){//若密码正确
+                return JSONObject.fromObject(user);
+            }else{
+                return new JSONObject().getJSONObject("password or id is wrong");
             }
-        } catch (Exception e){
-            System.out.println(e);
         }
-        return "login";
+    }
+
+    @RequestMapping(value = "/register")
+    public JSONObject register(@RequestParam("model.User.name")Integer id,
+                               @RequestParam("model.User.password")String password){
+        //若用户已存在
+        if(userServiceImpl.ifExistUser(id)){
+            return new JSONObject().getJSONObject("id already exists");
+        } else{
+            userServiceImpl.register(new User(id,password));
+            return new JSONObject().getJSONObject("success");
+        }
     }
 }

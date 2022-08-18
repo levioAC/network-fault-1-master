@@ -25,15 +25,19 @@ public class User {
     public String password;
 
     @TableField("visits")
+    @Setter@Getter
     public Integer visits;
 
     @TableField("lastLogin")
+    @Setter@Getter
     public Date lastLogin;
 
     @TableField("type")
+    @Setter@Getter
     public Integer type;
 
     @TableField("status")
+    @Setter@Getter
     public Integer status;
 
     public User(Integer id,String password){
